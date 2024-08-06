@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"epifigo/connection"
+	"epifigo/handlers"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,5 +26,5 @@ func main() {
 	}()
 
 	log.Println("Server running in port", 8080)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", handlers.CreateRouter()))
 }
