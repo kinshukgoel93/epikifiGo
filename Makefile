@@ -15,7 +15,4 @@ build:
 start :	
 	./${BINARY}	
 
-start :
-	./${BINARY}	
-
 restart : build start
