@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
@@ -27,15 +29,13 @@ func CreateRouter() *chi.Mux {
 
 		// version 1
 		router.Route("/v1", func(router chi.Router) {
-
+			fmt.Println("came to router")
 			router.Get("/healthcheck", healthCheck)
 
+			//USERS
+			router.Get("/createUser", CreateUser)
+
 		})
-
-		// version 2 - add it if you want
-		// router.Route("/v2", func(router chi.Router) {
-		// })
-
 	})
 
 	return router
