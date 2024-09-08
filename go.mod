@@ -41,6 +41,7 @@ require (
 )
 
 require (
+	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.1.0 // direct
 	github.com/go-chi/cors v1.2.1 // direct
 	github.com/golang/snappy v0.0.4 // indirect

@@ -7,11 +7,6 @@ import (
 	"github.com/go-chi/cors"
 )
 
-type Response struct {
-	Msg  string
-	Code int
-}
-
 func CreateRouter() *chi.Mux {
 
 	router := chi.NewRouter()
@@ -33,7 +28,8 @@ func CreateRouter() *chi.Mux {
 			router.Get("/healthcheck", healthCheck)
 
 			//USERS
-			router.Get("/createUser", CreateUser)
+			router.Post("/createUser", CreateUser)
+			router.Get("/findUser", findUser)
 
 		})
 	})

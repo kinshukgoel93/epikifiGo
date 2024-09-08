@@ -6,8 +6,13 @@ import (
 	"net/http"
 )
 
+type healthCheckResponse struct {
+	Msg  string
+	Code int
+}
+
 func healthCheck(w http.ResponseWriter, r *http.Request) {
-	res := Response{
+	res := healthCheckResponse{
 		Msg:  "Health Check",
 		Code: 200,
 	}

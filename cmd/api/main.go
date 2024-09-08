@@ -32,6 +32,7 @@ func main() {
 			panic(err)
 		}
 	}()
+
 	services.New(mongoClient)
 	log.Println("Server running in port", 3030)
 	connectionError := http.ListenAndServe(":3030", handlers.CreateRouter())
