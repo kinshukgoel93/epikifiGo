@@ -2,94 +2,65 @@ package handlers
 
 import (
 	"encoding/json"
-	"epifigo/services"
-	"fmt"
+	"epifigo/models"
 	"log"
 	"net/http"
 )
 
-var user services.User
-
 type UserResponse struct {
-	Name        string
-	PhoneNumber string
-	Email       string
-	Msg         string
-	LoginCode   string
-	Code        int
+	Name        string `json:"name,omitempty"`
+	PhoneNumber string `json:"phoneNumber,omitempty"`
+	Email       string `json:"email,omitempty"`
+	Msg         string `json:"msg"`
+	LoginCode   string `json:"loginCode,omitempty"`
+	Code        int    `json:"code"`
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		log.Fatal("Body error", err)
-	}
+// CreateUser handles creating a new user
+func (app *Application) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var user models.User
 
-	err = user.InsertUser(user)
-	if err != nil {
-		errorRes := UserResponse{
-			Msg:  "Error",
-			Code: 304,
-		}
-		fmt.Println("Kinshuk err", err)
-		json.NewEncoder(w).Encode(errorRes)
+	// Decode JSON into user struct
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		log.Println("Failed to parse request body:", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	res := UserResponse{
-		Msg:  "We got you covered ! Check for unique code over mail.",
-		Code: 200,
+	// Insert user using service layer
+	if err := app.Models.UserService.InsertUser(&user); err != nil {
+		log.Println("User insert failed:", err)
+		http.Error(w, "Failed to create user", http.StatusInternalServerError)
+		return
 	}
 
-	jsonStr, err := json.Marshal(res)
-	if err != nil {
-		log.Fatal("Response", err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(res.Code)
-	w.Write(jsonStr)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"msg":  "User created successfully!",
+		"code": 200,
+	})
 }
 
-func findUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Print("Finding User Please wait....")
+// FindUser handles finding a user by phone number and validating login code
+func (app *Application) FindUser(w http.ResponseWriter, r *http.Request) {
+	log.Println("Hello User")
 	phoneNumber := r.URL.Query().Get("phoneNumber")
 	loginCode := r.URL.Query().Get("loginCode")
-	fmt.Println("phone number", phoneNumber)
 
-	userResponse, err := user.FindUserByPhoneNumber(phoneNumber)
-
+	user, err := app.Models.UserService.FindUserByPhoneNumber(phoneNumber)
 	if err != nil {
-		errorRes := UserResponse{
-			Msg:  "Error",
-			Code: 304,
-		}
-		json.NewEncoder(w).Encode(errorRes)
+		log.Println("User not found:", err)
+		http.Error(w, "User not found", http.StatusNotFound)
 		return
 	}
-	var res UserResponse
-	if userResponse.LoginCode == loginCode {
-		res = UserResponse{
-			Name:        userResponse.Name,
-			PhoneNumber: userResponse.PhoneNumber,
-			Email:       userResponse.Email,
-			Code:        200,
 
-			Msg: "Welcome " + userResponse.Name,
-		}
+	if user.LoginCode == loginCode {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"name":  user.Name,
+			"email": user.Email,
+			"msg":   "Login successful!",
+			"code":  200,
+		})
 	} else {
-		res = UserResponse{
-			Msg:  "Please find the correct login code",
-			Code: 404,
-		}
+		http.Error(w, "Invalid login code", http.StatusUnauthorized)
 	}
-
-	jsonStr, err := json.Marshal(res)
-	if err != nil {
-		log.Fatal("Response", err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(res.Code)
-	w.Write(jsonStr)
 }

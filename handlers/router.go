@@ -1,39 +1,23 @@
 package handlers
 
 import (
-	"fmt"
+	"epifigo/services"
+	"log"
+	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
+	"github.com/gorilla/mux"
 )
 
-func CreateRouter() *chi.Mux {
+type Application struct {
+	Models services.Models
+}
 
-	router := chi.NewRouter()
+func CreateRouter(app Application) http.Handler {
+	log.Println("Hello Router")
+	r := mux.NewRouter()
+	r.HandleFunc("/healthcheck", app.healthCheck).Methods("GET")
+	r.HandleFunc("/createUser", app.CreateUser).Methods("POST")
+	r.HandleFunc("/findUser", app.FindUser).Methods("GET")
 
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTION"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CRSF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}))
-
-	router.Route("/api", func(router chi.Router) {
-
-		// version 1
-		router.Route("/v1", func(router chi.Router) {
-			fmt.Println("came to router")
-			router.Get("/healthcheck", healthCheck)
-
-			//USERS
-			router.Post("/createUser", CreateUser)
-			router.Get("/findUser", findUser)
-
-		})
-	})
-
-	return router
-
+	return r
 }

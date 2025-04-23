@@ -11,7 +11,7 @@ type healthCheckResponse struct {
 	Code int
 }
 
-func healthCheck(w http.ResponseWriter, r *http.Request) {
+func (app *Application) healthCheck(w http.ResponseWriter, r *http.Request) {
 	res := healthCheckResponse{
 		Msg:  "Health Check",
 		Code: 200,
